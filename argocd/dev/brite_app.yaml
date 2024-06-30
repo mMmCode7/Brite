@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: brite_app
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: "ECR_URL/brite_ap"
+    argocd-image-updater.argoproj.io/brite_app.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/brite_app.helm.image-name: "image.repository"
+    argocd-image-updater.argoproj.io/brite_app.helm.image-tag: "image.tag"
+    argocd-image-updater.argoproj.io/brite_app.allow-tags: regexp:^v1.0.0-[0-9a-zA-Z]+$
+spec:
+  project: dev-apps
+
+  source:
+    repoURL: 'https://github.com/mMmCode7/Brite.git'
+    targetRevision: HEAD
+    path: helm
+    helm:
+      valueFiles:
+        - dev_values.yaml
+
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
