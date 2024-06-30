@@ -1,0 +1,33 @@
+name: Deploy ECR Repository
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/aws/ecr/**'  
+
+jobs:
+  deploy:
+    name: Deploy ECR Repository
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.0.0
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Plan Terraform changes
+        run: terraform plan -out=tfplan
+        continue-on-error: true
+
+      - name: Apply Terraform changes
+        if: success()
+        run: terraform apply -auto-approve tfplan
